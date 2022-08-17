@@ -1,7 +1,9 @@
 import axios from 'axios';
-import { parseCookies } from 'nookies';
+import { parseCookies, setCookie } from 'nookies';
 
 let cookies = parseCookies();
+let isRefreshing = false;
+let failedRequestQueue = [];
 
 export const api = axios.create({
   baseURL: 'http://localhost:3333',
@@ -18,23 +20,48 @@ api.interceptors.response.use((response) => {
       cookies = parseCookies();
 
       const { '@web-app-refresh-token': refresh_token} = cookies;
+      const original_config = error.config;
 
-      api.post('/auth/refresh-token', {
-        refresh_token
-      }).then((response) => {
-        const { access_token } = response.data;
+      if(!isRefreshing) {
+        isRefreshing = true;
 
-        setCookie(undefined, '@web-app-access-token', access_token, {
-          maxAge: 60 * 60 * 24 * 30,
-          path: '/'
+        api.post('/auth/refresh-token', {
+          refresh_token
+        }).then((response) => {
+          const { access_token } = response.data;
+  
+          setCookie(undefined, '@web-app-access-token', access_token, {
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/'
+          });
+          setCookie(undefined, '@web-app-refresh-token', response.data.refresh_token, {
+            maxAge: 60 * 60 * 24 * 30,
+            path: '/'
+          });
+  
+          api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
+
+          failedRequestQueue.forEach((request) => request.onSuccess(access_token));
+          failedRequestQueue = []
+        }).catch((err) => {
+          failedRequestQueue.forEach((request) => request.onFailure(err));
+          failedRequestQueue = []
+        }).finally(() => {
+          isRefreshing = false;
         });
-        setCookie(undefined, '@web-app-refresh-token', response.data.refresh_token, {
-          maxAge: 60 * 60 * 24 * 30,
-          path: '/'
-        });
-
-        api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
-      })
+      }
+      return new Promise((resolve, reject) => {
+        failedRequestQueue.push({
+          onSuccess: (access_token) => {
+            original_config.headers['Authorization'] = `Bearer ${access_token}`;
+            
+            resolve(api(original_config));
+          },
+          onFailure: (err) => {
+            reject(err);
+          },
+        })
+      });
     } else {
       
     }
