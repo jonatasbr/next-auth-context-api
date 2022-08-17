@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { parseCookies } from "nookies";
 import { AuthContext } from '../context/AuthContext';
 import styles from '../styles/Home.module.css';
 
@@ -25,4 +26,21 @@ export default function Home() {
       <button type="submit">acessar</button>
     </form>
   );
+}
+
+export const getServerSideProps = async (context) => {
+  const cookies = parseCookies(context);
+
+  if (cookies['@web-app-access-token']) {
+    return {
+      redirect: {
+        destination: '/dashboard',
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {}
+  }
 }
