@@ -1,6 +1,6 @@
-import { useContext, useState } from "react"
-import { AuthContext } from "../context/AuthContext";
-import styles from '../styles/Home.module.css'
+import { useContext, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import styles from '../styles/Home.module.css';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -24,5 +24,5 @@ export default function Home() {
       <input type="password" value={password} placeholder="Senha" onChange={e => setPassword(e.target.value)} className={styles.fields} />
       <button type="submit">acessar</button>
     </form>
-  )
+  );
 }
