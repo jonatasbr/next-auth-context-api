@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react';
-import { parseCookies } from "nookies";
 import { AuthContext } from '../context/AuthContext';
 import styles from '../styles/Home.module.css';
+import { withSSRGuest } from '../utils/withSSRGuest';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -31,5 +31,5 @@ export default function Home() {
 export const getServerSideProps = withSSRGuest(async (context) => {
   return {
     props: {}
-  }  
+  }
 });

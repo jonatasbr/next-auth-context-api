@@ -1,13 +1,13 @@
 import { parseCookies } from 'nookies';
 
-export function withSSRGuest(fn) {
+export function withSSRAuth(fn) {
   return async (context) => {
     const cookies = parseCookies(context);
 
-    if (cookies['@web-app-access-token']) {
+    if (!cookies['@web-app-access-token']) {
       return {
         redirect: {
-          destination: '/dashboard',
+          destination: '/',
           permanent: false,
         },
       }
