@@ -12,8 +12,8 @@ export function AuthProvider({ children })  {
   useEffect(() => {
     const { '@web-app-access-token': access_token } = parseCookies();
     if(access_token) {
-      api.get('/profile').then(response => {
-        const { email, permissions, roles } = response.data;
+      api.get('/profile').then((response) => {
+        const { email, permissions, roles } = response?.data;
         setUser({ email, permissions, roles });
       });
     }
@@ -27,7 +27,7 @@ export function AuthProvider({ children })  {
       const { access_token, refresh_token, permissions, roles } = response.data;
 
       setCookie(undefined, '@web-app-access-token', access_token, {
-        maxAge: 60 * 60 * 24,
+        maxAge: 60 * 60 * 24 * 30,
         path: '/'
       });
       setCookie(undefined, '@web-app-refresh-token', refresh_token, {
@@ -37,7 +37,7 @@ export function AuthProvider({ children })  {
       setUser({ email, permissions, roles });
 
       api.defaults.headers['Authorization'] = `Bearer ${access_token}`;
-      
+
       Router.push('/dashboard')
     } catch(err) {
       console.log(err);
