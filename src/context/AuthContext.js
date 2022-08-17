@@ -1,9 +1,15 @@
 import { createContext, useEffect, useState } from 'react';
-import { parseCookies, setCookie } from 'nookies';
+import { destroyCookie, parseCookies, setCookie } from 'nookies';
 import Router from 'next/router';
 import { api } from '../../services/api';
 
 export const AuthContext = createContext({});
+
+export function signOut() {
+  destroyCookie(undefined, '@web-app-access-token');
+  destroyCookie(undefined, '@web-app-refresh-token');
+  Router.push('/');
+}
 
 export function AuthProvider({ children })  {
   const [user, setUser] = useState();
@@ -15,6 +21,8 @@ export function AuthProvider({ children })  {
       api.get('/profile').then((response) => {
         const { email, permissions, roles } = response?.data;
         setUser({ email, permissions, roles });
+      }).catch(() => {
+        signOut();
       });
     }
   }, []);
