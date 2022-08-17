@@ -1,24 +1,29 @@
-import { createContext } from 'react';
+import Router from 'next/router';
+import { createContext, useState } from 'react';
 import { api } from '../../services/api';
 
 export const AuthContext = createContext({});
 
 export function AuthProvider({ children })  {
-  const isAuthenticated = false;
+  const [user, setUser] = useState();
+  const isAuthenticated = !!user;
 
   async function signIn({ email, password }) {
     try {
       const response = await api.post('auth', {
         email, password
       });
-      console.log(response.data);
+      const { permissions, roles } = response.data;
+      setUser({ email, permissions, roles });
+
+      Router.push('/dashboard')
     } catch(err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   return (
-    <AuthContext.Provider value={{ signIn, isAuthenticated}}>
+    <AuthContext.Provider value={{ signIn, isAuthenticated, user }}>
       {children}
     </AuthContext.Provider>
   );
