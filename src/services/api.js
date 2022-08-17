@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { parseCookies, setCookie } from 'nookies';
-import { signOut } from '../src/context/AuthContext';
+import { signOut } from '../context/AuthContext';
+import { AuthTokenError } from '../errors/AuthTokenError';
 
 let isRefreshing = false;
 let failedRequestQueue = [];
@@ -27,6 +28,8 @@ export function getApi(context = undefined) {
   
         if(!isRefreshing) {
           isRefreshing = true;
+
+          console.log('refresh');
   
           api.post('/auth/refresh-token', {
             refresh_token
@@ -72,6 +75,8 @@ export function getApi(context = undefined) {
       } else {
         if (process.window) {
           signOut();
+        } else {
+          return Promise.reject(new AuthTokenError());
         }
       }
     }

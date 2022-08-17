@@ -1,4 +1,5 @@
-import { parseCookies } from 'nookies';
+import { destroyCookie, parseCookies } from 'nookies';
+import { AuthTokenError } from '../errors/AuthTokenError';
 
 export function withSSRAuth(fn) {
   return async (context) => {
@@ -13,6 +14,20 @@ export function withSSRAuth(fn) {
       }
     }
   
-    return await fn(context);
+    try {
+      return await fn(context);
+    } catch(err) {
+      if (err instanceof AuthTokenError) {
+        destroyCookie(context, '@web-app-access-token');
+        destroyCookie(context, '@web-app-refresh-token');
+    
+        return {
+          redirect: {
+            destination: '/',
+            permanent: false,
+          }
+        }
+      }
+    }
   }
 }
