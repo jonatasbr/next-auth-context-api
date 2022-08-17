@@ -4,13 +4,10 @@ import { withSSRAuth } from '../utils/withSSRAuth';
 import { getApi } from '../services/api';
 import { api } from '../services/apiClient';
 import { useCan } from '../hooks/useCan';
+import { Can } from '../components/Can';
 
 export default function Dashboard() {
   const { user  } = useContext(AuthContext);
-
-  const userIsAdmin = useCan({
-    roles: ['administrator']
-  });
 
   useEffect(() => {
     api.get('/profile')
@@ -21,7 +18,9 @@ export default function Dashboard() {
     <div>
       <h1>Dashboard: {user?.email}</h1>
 
-      { userIsAdmin && <div>Usuário admin</div> }
+      <Can roles={['administrator']}>
+        <div>recurso de admin</div>
+      </Can>
     </div>
   );
 }
