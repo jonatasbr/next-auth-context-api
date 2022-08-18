@@ -3,11 +3,10 @@ import { AuthContext } from '../context/AuthContext';
 import { withSSRAuth } from '../utils/withSSRAuth';
 import { getApi } from '../services/api';
 import { api } from '../services/apiClient';
-import { useCan } from '../hooks/useCan';
 import { Can } from '../components/Can';
 
 export default function Dashboard() {
-  const { user  } = useContext(AuthContext);
+  const { user, signOut } = useContext(AuthContext);
 
   useEffect(() => {
     api.get('/profile')
@@ -17,6 +16,8 @@ export default function Dashboard() {
   return (
     <div>
       <h1>Dashboard: {user?.email}</h1>
+
+      <button onClick={signOut}>Sair</button>
 
       <Can roles={['administrator']}>
         <div>recurso de admin</div>
